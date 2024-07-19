@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #chat-pool {
+            height: 400px;
+            overflow: auto;
+            border: 1px solid;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        #chat-pool>div {
+            padding: 5px 10px;
+        }
+
+        #chat-form {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        #chat-input {
+            flex-grow: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div style="width: 350px;">
+            <button onclick="onJoinRoom()">join room</button>
+            <div id="chat-pool"></div>
+            <form id="chat-form" onsubmit="onClickSend(event)">
+                <input id="chat-input">
+                <button>kirim</button>
+            </form>
+        </div>
+    </main>
+
+
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const urlParams = new URLSearchParams(window.location.search);
+        const user = urlParams.get('user') ?? 1;
+        const room = urlParams.get('room') ?? 1;
+
+        function appendNewChat(newMessage, isMine) {
+            const chatPool = document.getElementById('chat-pool');
+            const newItemChat = document.createElement('div');
+            newItemChat.textContent = newMessage;
+            if (isMine) newItemChat.style.marginLeft = 'auto';
+            chatPool.prepend(newItemChat);
+        }
+
+        socket.on('get chat', (data) => {           // <- Do something when server emit event 'get chat'
+            appendNewChat(data.message, String(data.sender) == user);
+        });
+
+        function onClickSend(event) {
+            event.preventDefault();                 // <- Disable default action on submit form
+            const chatInput = document.getElementById('chat-input');
+            socket.emit('send chat', {
+                room,
+                sender: user,
+                message: chatInput.value
+            });
+            appendNewChat(chatInput.value, true);   // <- Send message to server
+            chatInput.value = '';
+        }
+
+        function onJoinRoom() {
+            socket.emit('join', room);
+        }
+    </script>
+</body>
+
+</html>
