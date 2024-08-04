@@ -24,8 +24,8 @@ io.on('connection', (socket) => {                   // <- Do something when a ne
     socket.on('join', (roomId) => {
         socket.join(roomId);
     })
-    socket.on('send chat', (msg) => {               // <- Do something when client emit event 'send chat' 
-        socket.to(1).emit('get chat', msg);     // <- Publishing the new message to all client
+    socket.on('send chat', (ctx) => {               // <- Do something when client emit event 'send chat' 
+        socket.to(ctx.room).emit('get chat', ctx);     // <- Publishing the new message to all client
     });
 });
 

@@ -33,7 +33,6 @@
 <body>
     <main>
         <div style="width: 350px;">
-            <button onclick="onJoinRoom()">join room</button>
             <div id="chat-pool"></div>
             <form id="chat-form" onsubmit="onClickSend(event)">
                 <input id="chat-input">
@@ -50,6 +49,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const user = urlParams.get('user') ?? 1;
         const room = urlParams.get('room') ?? 1;
+        socket.emit('join', room);                 // <- Client must join to specific room
 
         function appendNewChat(newMessage, isMine) {
             const chatPool = document.getElementById('chat-pool');
@@ -73,10 +73,6 @@
             });
             appendNewChat(chatInput.value, true);   // <- Send message to server
             chatInput.value = '';
-        }
-
-        function onJoinRoom() {
-            socket.emit('join', room);
         }
     </script>
 </body>
